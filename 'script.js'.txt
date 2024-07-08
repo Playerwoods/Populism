@@ -46,3 +46,64 @@ function createCards() {
         cardElement.className = 'card';
         cardElement.innerHTML = `
             <div>${card.description}</div>
+            <div class="card-hint">${card.hint}</div>
+            <div class="card-strategy">${card.strategy}</div>
+        `;
+        cardElement.addEventListener('click', () => playCard(index, cardElement));
+        cardContainer.appendChild(cardElement);
+    });
+}
+
+function playCard(index, cardElement) {
+    if (cardElement.classList.contains('flipped') || currentRound > totalRounds) return;
+
+    const card = cards[index];
+    cardElement.classList.add('flipped');
+    cardElement.innerHTML += `<div>Effect: ${card.effect}</div>`;
+
+    updatePosition(card.effect);
+    updateScore(card.effect);
+    currentRound++;
+
+    if (currentRound <= totalRounds) {
+        roundInfo.textContent = `Round: ${currentRound} / ${totalRounds}`;
+    } else {
+        endGame();
+    }
+}
+
+function updatePosition(effect) {
+    position += effect;
+    position = Math.max(0, Math.min(100, position));
+    divider.style.left = `${position}%`;
+}
+
+function updateScore(effect) {
+    if (effect > 0) {
+        score += effect;
+        playerScore.textContent = `Populist Influence: ${score}`;
+    }
+}
+
+function endGame() {
+    roundInfo.textContent = 'Game Over';
+    if (position > 60) {
+        gameResult.textContent = 'Victory! Your populist message resonated with the median voter.';
+    } else {
+        gameResult.textContent = 'Defeat. The establishment maintained its grip on the median voter.';
+    }
+    gameResult.innerHTML += `<br>Final Score: ${score}`;
+    resetButton.style.display = 'inline-block';
+}
+
+function resetGame() {
+    position = 50;
+    currentRound = 1;
+    score = 0;
+    divider.style.left = '50%';
+    roundInfo.textContent = 'Round: 1 / 5';
+    playerScore.textContent = 'Populist Influence: 0';
+    gameResult.textContent = '';
+    resetButton.style.display = 'none';
+    shuffleCards();
+
